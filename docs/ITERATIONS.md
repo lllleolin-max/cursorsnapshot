@@ -201,3 +201,10 @@ regression checks the original oversize, long zero-prefixed legal value,
 Latin1non-ASCII digit, exact16KiB/one over, zero/negative/empty and duplicate
 headers. Exact after SHA and ordinary receipt are supplied by successor handoff;
 the original0fQA/CI/version facts are not relabeled as successor execution.
+
+The first successor8d725e3 ordinary suite run found a new regression-harness
+mistake: HTTPConnection is not a context manager. It failed before making that
+regression's first request; other18tests passed. The failed packet is preserved.
+The test now uses contextlib.closing; no product behavior changed in this test
+repair, and it is not an extra correction round. Final successor receipt names
+the exact new SHA and reruns the unchanged independent original probe.
