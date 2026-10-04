@@ -163,3 +163,21 @@ The exact original positional-output probe must now refuse all conflicting pairs
 before creating a snapshot or changing either file, exit0. A six-direction
 regression covers HTTP setup and direct SDK extraction with byte preservation.
 Exact installed after results will be appended after verification.
+
+After8400c98b138802165d1838fafd957588e0c80fe2, canonical ordinary/fresh
+installation passed18tests8.478s, actual HTTP example, both unchanged1000row kill
+probes, the independent unchanged namespace probe,12-case real HTTP controls
+and100/1000row installed CLI whole consumers, all exit0. Each conflicting
+namespace refused path_alias and preserved the manager's complete28672bytes.
+WAL support for disjoint normal source/store files remains exercised in controls.
+The two whole exports contain9485/97772JSONL bytes and exactly match independently
+frozen typed SQL rows, sums5050/500500, after post-freeze writes and actual server
+death/restart. Four substantive core corrections are retained; round3 remains
+an operational P3 and is not counted toward the three-core requirement.
+
+One development command accidentally used the old installed330f local .venv
+against later18test files, producing expected old-behavior failures. This was a
+runtime association mistake in a development run, not a fifth new defect or a
+passing current-version receipt. Current source development checks then passed;
+all accepted version claims come from separate canonical fresh wheel packets
+with isolated module bytes checked. Original failed history remains retained.
