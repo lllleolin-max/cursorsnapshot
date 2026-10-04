@@ -77,6 +77,9 @@ characters/2048UTF-8bytes. Imported matching ordinary tables can be read; the
 demonstration's write API requires its owned source role. Views, generated
 columns, extra columns, arbitrary SQL, custom collations and unknown ordering
 semantics are unsupported. Query permits an optional exact category filter.
+Tenant/category matching is case-sensitive BINARY, even if an imported source
+declares a built-in NOCASE column collation; source collation cannot broaden
+cursor identity.
 Sort permits priority/title/total_cents/order_id, ASC/DESC, explicit NULL
 FIRST/LAST, then unique order_id ASC. Text uses SQLite BINARY semantics without
 Unicode normalization; each typed value and duplicate sort key is preserved.

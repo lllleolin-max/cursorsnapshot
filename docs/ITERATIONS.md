@@ -38,3 +38,27 @@ through normal connect operations. The same probe must report controlled refusal
 no main file and identical sidecar bytes for all9cases, exit0. This round's exact
 after SHA and ordinary-wheel results will be appended after verification; initial
 feature/test growth/document edits do not count as additional rounds.
+
+After3a7cc58c845f00a3c3429cadf9505d83f242dafb, canonical ordinary wheel/fresh
+installation passed12tests5.499s, actual HTTP example and all9 unchanged original
+sidecar probe cases, exit0. Every foreign sidecar hash is preserved and no main
+file is created. Before canonical330f probe exits1. Independent review pending.
+
+## Round2 — source collation must not widen tenant/query identity
+
+Before3a7cc58c845f00a3c3429cadf9505d83f242dafb. Original unchanged builder
+`tenant_collation.py` SHA2560a468e48ba17b0b825cc6aa4e22e0285a7165555814cddc61beffc576c511f76
+builds a supported ordinary source with built-in NOCASE tenant/category columns.
+Native raw SQLite BINARY-filter truth selects one shop/open row. Actual HTTP
+snapshot/page selected three rows including other tenant SHOP and category OPEN,
+because unqualified predicates inherited the source column collation. MAC binding
+alone did not protect the selected data's identity. Canonical installed before
+receipt preserves all rows/metadata and exits1; LAB values contain no real data.
+
+Correction explicitly applies BINARY to source tenant/category predicates and
+checks each extracted record's exact identities within the read transaction. It
+retains the ordinary source adapter and built-in NOCASE source support, rather
+than deleting the affected domain. The same actual HTTP/native SQL probe must
+select exactly the original one-row truth, exit0. This whole identity/filter
+problem is one round, not two fixes counted separately; exact after/results will
+be recorded after ordinary installation verification.

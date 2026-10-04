@@ -61,6 +61,17 @@ class Workflow(unittest.TestCase):
         result = page(self.store, 'shop', snapshot['cursor'], KEY, query={'category': 'open'})
         self.assertEqual(result['records'], expected)
 
+    def test_external_nocase_cannot_broaden_identity(self):
+        external = self.root/'external.sqlite'
+        with closing(sqlite3.connect(external)) as connection, connection:
+            connection.executescript('CREATE TABLE orders(tenant TEXT COLLATE NOCASE NOT NULL,order_id INTEGER NOT NULL,priority INTEGER,title TEXT NOT NULL,total_cents INTEGER NOT NULL,category TEXT COLLATE NOCASE NOT NULL,PRIMARY KEY(tenant,order_id)) STRICT;')
+            rows = [dict(record(1), tenant='SHOP', category='open'), dict(record(2), category='OPEN'), dict(record(3), category='open')]
+            connection.executemany('INSERT INTO orders VALUES(?,?,?,?,?,?)', [list(row.values()) for row in rows])
+        snapshot = create_snapshot(external, self.store, 'shop', KEY, query={'category': 'open'})
+        self.assertEqual(snapshot['rows'], 1)
+        result = page(self.store, 'shop', snapshot['cursor'], KEY, query={'category': 'open'})
+        self.assertEqual(result['records'], [rows[2]])
+
     def test_hmac_oracle_and_binding(self):
         snapshot = create_snapshot(self.source, self.store, 'shop', KEY)
         body, signature = snapshot['cursor'].split('.')

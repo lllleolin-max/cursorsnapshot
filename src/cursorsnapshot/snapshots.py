@@ -46,9 +46,9 @@ def create_snapshot(source, store, tenant, key, *, query=None, sort=None, ttl_se
             raise SnapshotError('active_quota')
         destination.execute('INSERT INTO snapshots VALUES(?,?,?,?,?,?,?,?,?)',
                             (snapshot_id, tenant, canonical(query).decode(), canonical(sort).decode(), SCHEMA, expires, 0, 0, 'ready'))
-        condition, values = 'tenant=?', [tenant]
+        condition, values = 'tenant COLLATE BINARY=?', [tenant]
         if query['category'] is not None:
-            condition += ' AND category=?'; values.append(query['category'])
+            condition += ' AND category COLLATE BINARY=?'; values.append(query['category'])
         # A finite VM budget is a scan budget, not a hard CPU or RSS promise.
         work = [0]
         def budget():
@@ -57,7 +57,10 @@ def create_snapshot(source, store, tenant, key, *, query=None, sort=None, ttl_se
         origin.set_progress_handler(budget, 1000)
         cursor = origin.execute(f"SELECT {','.join(COLUMNS)} FROM orders WHERE {condition} ORDER BY {order_sql(sort)} LIMIT ?", values + [max_rows+1])
         for row in cursor:
-            record = order_record(dict(row)); count += 1; payload_bytes += len(canonical(record))
+            record = order_record(dict(row))
+            if record['tenant'] != tenant or (query['category'] is not None and record['category'] != query['category']):
+                raise SnapshotError('source_identity')
+            count += 1; payload_bytes += len(canonical(record))
             if count > max_rows:
                 raise SnapshotError('row_quota')
             if payload_bytes > max_payload_bytes or retained + payload_bytes > max_total_payload_bytes:
