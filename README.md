@@ -59,6 +59,12 @@ may be dumped. `dump` deliberately emits the entire records as JSONL. Summary
 commands omit titles and cursor/key material. Both snapshot and export
 initialization are create-only. Runtime refusal exits3, argument syntax exits2.
 HTTP/network failure preserves existing checkpoint data. Initial snapshot creation
+reports bounded allowlisted reasons: `remote_row_quota`/`remote_payload_quota`
+mean filter a smaller export or change operator limits; `remote_active_quota`
+means release unused snapshots or wait/collect; `remote_snapshot_expired` means
+create a new export, preserving the partial sink for diagnosis. Unknown/malformed
+remote errors retain only their HTTP status, without body/URL/credential text.
+Initial snapshot creation
 with a lost response can leave an orphan until expiry; it does not silently start
 a new snapshot in an existing export. `export_uninitialized` requires a new sink.
 

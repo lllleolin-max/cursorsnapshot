@@ -172,6 +172,33 @@ class Workflow(unittest.TestCase):
         finally:
             server.shutdown(); server.server_close(); thread.join(3)
 
+    def test_actionable_http_quota_reason(self):
+        server = make_server(self.source, self.store, KEY, quotas={'max_rows': 0})
+        thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
+        try:
+            with self.assertRaisesRegex(SnapshotError, '^remote_row_quota$'):
+                Client(f'http://127.0.0.1:{server.server_port}', 'shop').post('/snapshots', {})
+            self.assertEqual(status(self.store, 'shop'), [])
+        finally:
+            server.shutdown(); server.server_close(); thread.join(3)
+
+    def test_unknown_remote_error_body_is_not_reflected(self):
+        from http.server import BaseHTTPRequestHandler, HTTPServer
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *args):
+                pass
+            def do_POST(self):
+                self.rfile.read(int(self.headers['Content-Length']))
+                raw = canonical({'error': 'PUBLIC LAB private-value-must-not-be-reflected'})
+                self.send_response(400); self.send_header('Content-Length', str(len(raw))); self.end_headers(); self.wfile.write(raw)
+        server = HTTPServer(('127.0.0.1', 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
+        try:
+            with self.assertRaisesRegex(SnapshotError, '^remote_http_400$'):
+                Client(f'http://127.0.0.1:{server.server_port}', 'shop').post('/snapshots', {})
+        finally:
+            server.shutdown(); server.server_close(); thread.join(3)
+
 
 if __name__ == '__main__':
     unittest.main()

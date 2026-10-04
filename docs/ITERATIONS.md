@@ -62,3 +62,35 @@ than deleting the affected domain. The same actual HTTP/native SQL probe must
 select exactly the original one-row truth, exit0. This whole identity/filter
 problem is one round, not two fixes counted separately; exact after/results will
 be recorded after ordinary installation verification.
+
+After8993a42c2b9cf8e231b3f146314ed08df32e2eca, canonical ordinary wheel/fresh
+installed13tests4.749s, actual HTTP example and unchanged original collation probe
+all exit0. HTTP now exactly matches the one-row raw SQLite truth. No source/domain
+capability was removed. Independent review remains separate.
+
+## Round3 — actionable bounded HTTP refusal mapping
+
+Before8993a42c2b9cf8e231b3f146314ed08df32e2eca. Original unchanged builder
+`http_diagnostics.py`, SHA25676ed5798f260b4371899d506e7acf9751796a82c76b70891350645653d114a85,
+actually creates three HTTP scenarios. Native server error bodies distinguish
+row_quota/active_quota/snapshot_expired, but installed SDK discards them and
+reports remote_http_400 for both quotas and remote_http_410 for expiry. Callers
+cannot choose filter/limit vs release/collect vs create-new-export from that
+public error. Refused states remained intact. This is a measured operational
+interface insufficiency (P3), not a new data-loss claim or an invariant P2.
+
+Correction reads/closes HTTPError with1024byte cap and exposes only a finite exact
+private-code allowlist. Unknown/malformed/oversized remote bodies remain generic
+HTTP codes and are never reflected. The same native-server/SDK probe must now
+observe remote_row_quota/remote_active_quota/remote_snapshot_expired, exit0, with
+the same refusal state. A privacy control verifies that arbitrary remote values
+stay private. This round may be rejected by independent review if judged
+insufficiently substantive; three repairs never terminate further core review.
+Exact after SHA and installed results will be recorded after verification.
+
+The HTTP pilot script is additional verification, not another repair: static
+OFFSET/live keyset/held read transaction/snapshot all match complete SQL truth;
+with the same writes a held transaction remains correct; after a real process
+kill it loses its frozen view while a durable snapshot continues. Costs and
+negative/equal cases remain; mature live pagination is not labeled broken for
+having a different consistency contract.

@@ -8,6 +8,11 @@ from .model import (COLUMNS, SCHEMA, SnapshotError, canonical, decode_json, iden
                     integer, order_record, order_sql, query_spec, sort_spec)
 from .storage import connect, initialize
 
+REMOTE_REASONS = frozenset({'row_quota', 'payload_quota', 'active_quota', 'snapshot_expired',
+                            'snapshot_gone', 'reader_busy', 'reader_lease_expired', 'cursor_binding',
+                            'cursor_signature', 'cursor_schema', 'source_schema', 'source_identity',
+                            'file_missing', 'sqlite_failure'})
+
 
 class NoRedirect(request.HTTPRedirectHandler):
     def redirect_request(self, *args, **kwargs):
@@ -44,8 +49,20 @@ class Client:
                 raw = response.read(4*1024*1024+1)
                 return decode_json(raw, 4*1024*1024)
         except error.HTTPError as exception:
-            # Raw remote body and URL are intentionally not included in local errors.
-            raise SnapshotError('remote_http_'+str(exception.code)) from exception
+            status, reason = exception.code, None
+            try:
+                # Parse only a bounded exact private-code envelope, never arbitrary
+                # remote text. Close even unknown/malformed responses explicitly.
+                with exception:
+                    raw = exception.read(1025)
+                if len(raw) <= 1024:
+                    body = decode_json(raw, 1024)
+                    value = body.get('error')
+                    if set(body) == {'error'} and isinstance(value, str) and value in REMOTE_REASONS:
+                        reason = value
+            except (SnapshotError, OSError, TimeoutError):
+                pass
+            raise SnapshotError('remote_'+reason if reason else 'remote_http_'+str(status)) from None
         except (error.URLError, OSError, TimeoutError) as exception:
             raise SnapshotError('network_unknown') from exception
 
