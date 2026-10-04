@@ -47,12 +47,19 @@ def make_server(source, store, key, *, host='127.0.0.1', port=0, quotas=None):
                     raise SnapshotError('invalid_headers')
                 tenant = identity(self.headers['X-Tenant'])
                 length = self.headers['Content-Length']
-                if not length.isascii() or not length.isdecimal() or not 0 < int(length) <= 16384:
+                if not length.isascii() or not length.isdecimal():
                     raise SnapshotError('invalid_body_size')
+                # ASCII 1*DIGIT can contain arbitrarily many leading zeros
+                # within the server's header cap. Bound lexically before int(),
+                # avoiding Python's digit-limit exception for an oversized value.
+                length = length.lstrip('0') or '0'
+                if length == '0' or len(length) > 5 or (len(length) == 5 and length > '16384'):
+                    raise SnapshotError('invalid_body_size')
+                length = int(length)
                 if self.headers.get('Content-Type') != 'application/json':
                     raise SnapshotError('invalid_content_type')
-                raw = self.rfile.read(int(length))
-                if len(raw) != int(length):
+                raw = self.rfile.read(length)
+                if len(raw) != length:
                     raise SnapshotError('truncated_body')
                 body = decode_json(raw)
                 if self.path == '/snapshots' and not set(body) - {'query', 'sort', 'ttl_seconds'}:

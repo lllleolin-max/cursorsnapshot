@@ -181,3 +181,23 @@ runtime association mistake in a development run, not a fifth new defect or a
 passing current-version receipt. Current source development checks then passed;
 all accepted version claims come from separate canonical fresh wheel packets
 with isolated module bytes checked. Original failed history remains retained.
+
+## Round6 — controlled HTTP length refusal (operational P3)
+
+Original frozen0f0a257e95eb148b8d2fdac6257eb3d9b4796e70 and its final ordinary
+packet remain retained. Independent unchanged `cursorsnapshot_large_content_length.py`
+copy SHA256c457b363ff81c83a047017f1330fabd261ad02d38f774a3d2eddedf3f7c6e973
+declares5000ASCII nines within the native65536byte header limit. Python int()
+raises its digit-limit ValueError, producing RemoteDisconnected and a traceback
+instead of the promised private400. Our original0finstalled rerun exits1 with
+1603stderr bytes. Both databases remain byte-identical, zero snapshots, service
+continues; no core data-loss/P2 claim and no additional core round is counted.
+
+Root explicitly authorized a narrow successor repair after freeze. Length is
+checked as ASCII decimal, leading zeros removed and normalized value compared
+lexically with16384 BEFORE bounded int conversion.5000leading zeros plus2 remain
+legal, rather than shrinking the supported header domain. One actual HTTP
+regression checks the original oversize, long zero-prefixed legal value,
+Latin1non-ASCII digit, exact16KiB/one over, zero/negative/empty and duplicate
+headers. Exact after SHA and ordinary receipt are supplied by successor handoff;
+the original0fQA/CI/version facts are not relabeled as successor execution.

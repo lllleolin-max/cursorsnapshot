@@ -221,6 +221,36 @@ class Workflow(unittest.TestCase):
         finally:
             server.shutdown(); server.server_close(); thread.join(3)
 
+    def test_actual_http_content_length_lexical_boundaries(self):
+        import http.client
+        server = make_server(self.source, self.store, KEY)
+        thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
+        try:
+            for length, raw, expected in [('9'*5000, b'{}', 400),
+                                          ('0'*5000+'2', b'{}', 200),
+                                          ('\u00b2', b'{}', 400),
+                                          ('16384', b'{}'+b' '*16382, 200),
+                                          ('16385', b'{}', 400),
+                                          ('0'*5000, b'{}', 400),
+                                          ('-2', b'{}', 400), ('', b'{}', 400)]:
+                with http.client.HTTPConnection('127.0.0.1', server.server_port, timeout=5) as connection:
+                    connection.request('POST', '/snapshots', body=raw, headers={
+                        'Content-Length': length, 'X-Tenant': 'shop', 'Content-Type': 'application/json'})
+                    response = connection.getresponse(); body = response.read()
+                    self.assertEqual(response.status, expected)
+                    if expected == 400:
+                        self.assertEqual(body, canonical({'error': 'invalid_body_size'}))
+            with http.client.HTTPConnection('127.0.0.1', server.server_port, timeout=5) as connection:
+                connection.putrequest('POST', '/snapshots')
+                for name, value in [('X-Tenant', 'shop'), ('Content-Type', 'application/json'),
+                                    ('Content-Length', '2'), ('Content-Length', '2')]:
+                    connection.putheader(name, value)
+                connection.endheaders(b'{}'); response = connection.getresponse()
+                self.assertEqual(response.status, 400)
+                self.assertEqual(response.read(), canonical({'error': 'invalid_headers'}))
+        finally:
+            server.shutdown(); server.server_close(); thread.join(3)
+
     def test_unknown_remote_error_body_is_not_reflected(self):
         from http.server import BaseHTTPRequestHandler, HTTPServer
         class Handler(BaseHTTPRequestHandler):
