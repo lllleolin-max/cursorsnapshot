@@ -110,7 +110,8 @@ queries remain query-only. External sources remain read-only and require their
 own application to recover an interrupted source writer. Host files,
 clock and signing key are trusted; external host corruption, unauthorized file
 replacement and rollback are outside this guarantee. Symlink/hardlink aliases
-and source/manager reuse are rejected at supported API boundaries. Cursors are
+and any overlap of the source/manager main/-journal/-wal/-shm namespaces are
+rejected before SQLite opens either database at integration boundaries. Cursors are
 signed, **unencrypted** and should not be logged or shared.
 
 Snapshots, keyset pagination and continuation tokens are established prior art.
@@ -120,6 +121,7 @@ already provides pagination and next tokens. CursorSnapshot tests a local
 composition of durable selected rows, cursor identity/lifecycle quotas and an
 atomic resumable consumer. It makes no global novelty or incumbent deficiency
 claim. [PILOT](docs/PILOT.md) specifies static and concurrent controls, including
-correct live keyset and a held read transaction; baseline results remain pending
-until actual execution. MIT. Local review/publication status is in
+correct live keyset and a held read transaction; measured static, write and real
+process restart cases retain the equal/no-benefit controls and all preparation
+costs. MIT. Local review/publication status is in
 [ITERATIONS](docs/ITERATIONS.md) and [SELF_REVIEW](docs/SELF_REVIEW.md).

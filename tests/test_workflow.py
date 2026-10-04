@@ -176,6 +176,22 @@ class Workflow(unittest.TestCase):
                 self.assertFalse(database.exists())
                 self.assertEqual(sidecar.read_bytes(), sentinel)
 
+    def test_source_manager_namespaces_cannot_overlap(self):
+        for suffix in ('-journal', '-wal', '-shm'):
+            for direction in ('source-main', 'manager-main'):
+                folder = self.root/(direction+suffix); folder.mkdir()
+                base, sidecar = folder/'paired.sqlite', Path(str(folder/'paired.sqlite')+suffix)
+                source, store = (base, sidecar) if direction == 'source-main' else (sidecar, base)
+                initialize(base, 'source' if source == base else 'manager')
+                initialize(sidecar, 'source' if source == sidecar else 'manager')
+                before = {source: source.read_bytes(), store: store.read_bytes()}
+                with self.assertRaisesRegex(SnapshotError, '^path_alias$'):
+                    make_server(source, store, KEY)
+                with self.assertRaisesRegex(SnapshotError, '^path_alias$'):
+                    create_snapshot(source, store, 'shop', KEY)
+                for path, raw in before.items():
+                    self.assertEqual(path.read_bytes(), raw)
+
     def test_actual_http_export_and_atomic_checkpoint(self):
         server = make_server(self.source, self.store, KEY)
         thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()

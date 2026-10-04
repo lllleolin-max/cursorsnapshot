@@ -10,7 +10,8 @@ measured product insufficiency, substantive source correction and unchanged
 original FAIL->PASS probe. No-finding, document edits, test/harness growth and
 splitting the initial feature into commits do not count. Independent review
 files are never rewritten by the builder; false alarms and harness failures are
-retained with accurate attribution. Three real repair cycles are still pending.
+retained with accurate attribution. Four actual core corrections now exist;
+independent acceptance and public delivery remain pending.
 
 Pre-baseline installation actually found Windows cleanup failures because the
 initializer used SQLite's transaction context without explicitly closing its
@@ -131,3 +132,34 @@ sidecar/tenant/recovery chains are the three required core repairs; operational
 diagnostics, initial feature, pilot/tests growth and docs do not substitute.
 Exact after/result observations will follow verification; further known P2s
 still block acceptance.
+
+Afterc8e81f7202db25ecc8dd5db69842278c75521e3a, canonical ordinary wheel/fresh
+installation passed17tests6.648s, actual HTTP example, both original kill probes
+and12case fair HTTP pilot, all exit0. Public consumer recovery committed all1000
+rows/done1 and exactly matched2,139,786full JSONL bytes; the manager publicly
+returned empty status/GC before any raw RW oracle, then built a fresh1000row
+snapshot with full content agreement. This verifies three core chains at that
+point, without counting the operational diagnosis enhancement.
+
+## Round5 — paired database namespaces must be disjoint
+
+Independent unchanged probe `cursorsnapshot_source_namespace.py`, exact builder
+copy SHA2567343baa8500d3c2e10341f2a311976b5325550ecdd9683f98c30d49ffe888288,
+found a distinct actual data-loss defect at272b665548cd7744fb7a93b7e8e5d0ce8982bb4a.
+Our original-probe ordinary c8e81f7 rerun also exits1: an owned, quiesced WAL source
+and a manager named source.sqlite-wal pass the existing distinct-main guard;
+actual HTTP creates a ready snapshot and accepts an order write, after which
+SQLite removes the manager and paging returns remote_file_missing. The -shm
+case rejects setup only after changing manager bytes. The -journal negative
+refuses and preserves bytes; its negative result is retained. Both receipts
+remain immutable. This is not the prior hot-journal read recovery problem.
+
+Correction compares the source/manager pair's entire main/-journal/-wal/-shm
+namespaces, both filename directions and same-file aliases, before opening ANY
+SQLite connection at integration boundaries. Standalone create-only initialization
+cannot infer a future source/manager pairing; it still protects its own existing
+sidecars. No SQL capability or legitimate disjoint source WAL support is removed.
+The exact original positional-output probe must now refuse all conflicting pairs
+before creating a snapshot or changing either file, exit0. A six-direction
+regression covers HTTP setup and direct SDK extraction with byte preservation.
+Exact installed after results will be appended after verification.

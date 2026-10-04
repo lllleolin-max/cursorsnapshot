@@ -63,7 +63,11 @@ or status reads. The external source adapter stays mode=ro and does not acquire
 permission to recover/replace another application's source; its owner must recover
 a source hot journal if necessary. Recovery assumes the original file/sidecars and
 writable owned store, not an adversary changing directories between checks.
-Caller files and sidecars must be ordinary unique files; initialization is
+The source/manager pair reserves its entire main/-journal/-wal/-shm namespaces
+in both directions before SQLite opens either file. Different main filenames
+alone do not suffice: a manager cannot occupy a source WAL filename. Standalone
+initialization knows only its own namespace; pairing is checked by snapshot
+creation and HTTP setup. Caller files and sidecars must be ordinary unique files; initialization is
 exclusive. The host and directory contents are trusted during operations; this
 is not a sandbox against an adversary changing paths concurrently. Disk retained
 after deletes requires operator housekeeping, and exported business records are

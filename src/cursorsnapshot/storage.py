@@ -25,6 +25,11 @@ EXPORT_SQL = '''CREATE TABLE progress(singleton INTEGER PRIMARY KEY CHECK(single
  released INTEGER NOT NULL, expected_rows INTEGER NOT NULL) STRICT;
  CREATE TABLE records(tenant TEXT NOT NULL, order_id INTEGER PRIMARY KEY, priority INTEGER,
  title TEXT NOT NULL, total_cents INTEGER NOT NULL, category TEXT NOT NULL) STRICT;'''
+SIDECARS = ('-journal', '-wal', '-shm')
+
+
+def database_namespace(path):
+    return (path, *(Path(str(path) + suffix) for suffix in SIDECARS))
 
 
 def safe_path(path, protected=()):
@@ -34,14 +39,17 @@ def safe_path(path, protected=()):
             raise SnapshotError('path_alias')
     if path.exists() and (not path.is_file() or path.stat().st_nlink != 1):
         raise SnapshotError('path_alias')
-    for suffix in ('-journal', '-wal', '-shm'):
-        sidecar = Path(str(path) + suffix)
+    for sidecar in database_namespace(path)[1:]:
         if sidecar.is_symlink() or (sidecar.exists() and (not sidecar.is_file() or sidecar.stat().st_nlink != 1)):
             raise SnapshotError('path_alias')
     for other in protected:
         other = Path(other)
-        if path.resolve() == other.resolve() or (path.exists() and other.exists() and os.path.samefile(path, other)):
-            raise SnapshotError('path_alias')
+        # Distinct main filenames can still collide with SQLite's operational
+        # namespace. Check both directions before any SQLite connection opens.
+        for candidate in database_namespace(path):
+            for reserved in database_namespace(other):
+                if candidate.resolve() == reserved.resolve() or (candidate.exists() and reserved.exists() and os.path.samefile(candidate, reserved)):
+                    raise SnapshotError('path_alias')
     return path
 
 
@@ -51,7 +59,7 @@ def initialize(path, role):
     path = safe_path(path)
     # SQLite may consume/delete ordinary orphan WAL/journal files when opening a
     # new main DB. Reserve the entire database filename namespace before opening.
-    if any(Path(str(path)+suffix).exists() for suffix in ('-journal', '-wal', '-shm')):
+    if any(sidecar.exists() for sidecar in database_namespace(path)[1:]):
         raise SnapshotError('create_only_sidecar')
     try:
         fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
