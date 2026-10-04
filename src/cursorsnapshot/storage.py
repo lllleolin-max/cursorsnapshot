@@ -49,6 +49,10 @@ def initialize(path, role):
     if role not in ROLES:
         raise SnapshotError('invalid_role')
     path = safe_path(path)
+    # SQLite may consume/delete ordinary orphan WAL/journal files when opening a
+    # new main DB. Reserve the entire database filename namespace before opening.
+    if any(Path(str(path)+suffix).exists() for suffix in ('-journal', '-wal', '-shm')):
+        raise SnapshotError('create_only_sidecar')
     try:
         fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
         os.close(fd)

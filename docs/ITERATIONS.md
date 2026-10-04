@@ -20,3 +20,21 @@ ordinary installation passed11tests. This work predates the initial Git
 baseline, so it is not counted as one of the three post-baseline repair cycles.
 Source schema validation is inside the read transaction and verifies the unique
 tenant/id primary key; a reader checks its lease again after consuming its page.
+
+## Round1 — create-only SQLite sidecar namespace
+
+Before330fbbc598102982dc3ea2ff6d630f88e1d3b28e. Actual unchanged builder probe
+`orphan_sidecars.py`, SHA256159e64fb22c13f752d8e48b40f36b8294e4c922b168cd2696f887ab260c17bd5,
+created unrelated ordinary files under a fresh target's -journal/-wal/-shm names.
+Initialization accepted all9role/suffix cases and physically deleted existing
+journal/WAL contents. The main filename's exclusive creation did not protect
+SQLite's broader file namespace. Original wheel-installed and exact canonical
+before runs both exit1; complete receipts remain in builder evidence. This is a
+real file-preservation defect, not a hypothetical symlink attack.
+
+Correction refuses any existing sidecar before creating/opening the new main
+file. Existing valid databases still support their legitimate SQLite sidecars
+through normal connect operations. The same probe must report controlled refusal,
+no main file and identical sidecar bytes for all9cases, exit0. This round's exact
+after SHA and ordinary-wheel results will be appended after verification; initial
+feature/test growth/document edits do not count as additional rounds.

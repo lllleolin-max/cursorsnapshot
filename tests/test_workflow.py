@@ -130,6 +130,18 @@ class Workflow(unittest.TestCase):
         with self.assertRaises(SnapshotError):
             collect(self.source)
 
+    def test_initialize_preserves_orphan_sidecar_namespace(self):
+        for role in ('source', 'manager', 'export'):
+            for suffix in ('-journal', '-wal', '-shm'):
+                folder = self.root/(role+suffix); folder.mkdir()
+                database = folder/'fresh.sqlite'; sidecar = Path(str(database)+suffix)
+                sentinel = b'PUBLIC LAB unrelated file'
+                sidecar.write_bytes(sentinel)
+                with self.assertRaises(SnapshotError):
+                    initialize(database, role)
+                self.assertFalse(database.exists())
+                self.assertEqual(sidecar.read_bytes(), sentinel)
+
     def test_actual_http_export_and_atomic_checkpoint(self):
         server = make_server(self.source, self.store, KEY)
         thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
