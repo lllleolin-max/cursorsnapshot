@@ -46,7 +46,7 @@ def safe_path(path, protected=()):
 
 
 def initialize(path, role):
-    if role not in ROLES:
+    if not isinstance(role, str) or role not in ROLES:
         raise SnapshotError('invalid_role')
     path = safe_path(path)
     # SQLite may consume/delete ordinary orphan WAL/journal files when opening a
@@ -70,9 +70,24 @@ def connect(path, role=None, readonly=False):
     path = safe_path(path)
     if not path.exists():
         raise SnapshotError('file_missing')
+    if role is not None:
+        if not isinstance(role, str) or role not in ROLES:
+            raise SnapshotError('invalid_role')
+        # Establish static owned-file identity before SQLite is allowed to replay
+        # a hot journal. Opening a foreign DB RW first could alter its sidecars.
+        try:
+            with path.open('rb') as stream:
+                header = stream.read(100)
+        except OSError as error:
+            raise SnapshotError('io_failure') from error
+        if len(header) < 100 or header[:16] != b'SQLite format 3\x00' or int.from_bytes(header[68:72], 'big') != ROLES[role] or int.from_bytes(header[60:64], 'big') != 1:
+            raise SnapshotError('database_role')
     connection = None
     try:
-        connection = sqlite3.connect(path.as_uri() + ('?mode=ro' if readonly else '?mode=rw'), uri=True, timeout=2)
+        # Owned reads permit SQLite's rollback recovery. Query-only prevents SQL
+        # business writes; foreign source extraction continues to open mode=ro.
+        mode = 'rw' if role is not None or not readonly else 'ro'
+        connection = sqlite3.connect(path.as_uri() + '?mode=' + mode, uri=True, timeout=2)
         connection.row_factory = sqlite3.Row
         connection.execute('PRAGMA foreign_keys=ON')
         if not readonly:
@@ -80,6 +95,8 @@ def connect(path, role=None, readonly=False):
         if role is not None and (connection.execute('PRAGMA application_id').fetchone()[0] != ROLES[role]
                                  or connection.execute('PRAGMA user_version').fetchone()[0] != 1):
             raise SnapshotError('database_role')
+        if readonly:
+            connection.execute('PRAGMA query_only=ON')
         yield connection
     except sqlite3.Error as error:
         raise SnapshotError('sqlite_failure') from error

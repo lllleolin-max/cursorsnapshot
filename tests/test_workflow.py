@@ -141,6 +141,29 @@ class Workflow(unittest.TestCase):
         with self.assertRaises(SnapshotError):
             collect(self.source)
 
+    def test_recovery_role_guard_precedes_foreign_sqlite_open(self):
+        from cursorsnapshot.storage import connect
+        foreign = self.root/'foreign.sqlite'
+        with closing(sqlite3.connect(foreign)) as connection, connection:
+            connection.execute('CREATE TABLE unrelated(value TEXT)')
+            connection.execute("INSERT INTO unrelated VALUES('PUBLIC LAB foreign content')")
+        before = foreign.read_bytes()
+        journal = Path(str(foreign)+'-journal'); journal.write_bytes(b'PUBLIC LAB unrelated sidecar')
+        with self.assertRaises(SnapshotError):
+            status(foreign, 'shop')
+        self.assertEqual(before, foreign.read_bytes())
+        self.assertEqual(journal.read_bytes(), b'PUBLIC LAB unrelated sidecar')
+        with self.assertRaises(SnapshotError):
+            with connect(self.store, 'manager', readonly=True) as connection:
+                connection.execute('DELETE FROM snapshots')
+
+    def test_roles_require_strings(self):
+        for value in ([], {}, 1, None):
+            target = self.root/('invalid-'+str(type(value).__name__)+'.sqlite')
+            with self.assertRaises(SnapshotError):
+                initialize(target, value)
+            self.assertFalse(target.exists())
+
     def test_initialize_preserves_orphan_sidecar_namespace(self):
         for role in ('source', 'manager', 'export'):
             for suffix in ('-journal', '-wal', '-shm'):

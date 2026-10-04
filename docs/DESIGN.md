@@ -56,6 +56,13 @@ preserve all database history or make a simple static export cheaper. See
 this project uses selected-row read transactions, not raw main-file copies.
 
 SQLite operations use2second busy timeout, FULL sync and owned role/version checks.
+Owned manager/export reads validate the static SQLite header role/version before
+opening a recovery-capable connection; then SQL query-only mode prevents business
+writes. SQLite can roll back a killed writer's hot journal before public progress
+or status reads. The external source adapter stays mode=ro and does not acquire
+permission to recover/replace another application's source; its owner must recover
+a source hot journal if necessary. Recovery assumes the original file/sidecars and
+writable owned store, not an adversary changing directories between checks.
 Caller files and sidecars must be ordinary unique files; initialization is
 exclusive. The host and directory contents are trusted during operations; this
 is not a sandbox against an adversary changing paths concurrently. Disk retained

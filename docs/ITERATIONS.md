@@ -94,3 +94,40 @@ with the same writes a held transaction remains correct; after a real process
 kill it loses its frozen view while a durable snapshot continues. Costs and
 negative/equal cases remain; mature live pagination is not labeled broken for
 having a different consistency contract.
+
+After272b665548cd7744fb7a93b7e8e5d0ce8982bb4a, canonical ordinary/fresh
+installation passed15tests5.904s, original three diagnosis scenarios, actual HTTP
+example and12-case real HTTP fair controls, all exit0. Independent reviewer
+does not count the diagnosis enhancement as a required core correction; it is
+retained honestly as operational improvement rather than used to reach three.
+
+## Round4 — actual killed dirty-page transactions must recover publicly
+
+Before272b665548cd7744fb7a93b7e8e5d0ce8982bb4a. Original unchanged builder
+`killed_checkpoint.py`, SHA256a96be057ec33cf5be6c056b2561ff277018a48b6be3f1de16af950457af65462,
+receives a legal1000row HTTP page with512emoji/2048UTF-8byte titles,2,139,786byte
+complete output below the4MiB response cap. A real consumer subprocess is killed
+after all SQL inserts and before commit, with13832byte journal. Public
+step_export then fails sqlite_failure: its mode=ro progress read cannot perform
+SQLite hot-journal rollback. The raw RW oracle is opened only AFTER the product
+attempt, verifies0rows/done0 and cannot mask that public recovery failed. Original
+canonical wheel probe exits1; no data loss is claimed.
+
+Independent pre-review suggested checking the analogous manager entry point.
+Original `killed_materialization.py`, SHA256ace3a6b734cd1b4fb4b1e5e0e027212b08682d2ddd02fefc981866984b111197,
+really kills a1000row spilling snapshot build before publication commit, journal
+22016bytes. Public status likewise fails sqlite_failure; only then the RW oracle
+observes no partial snapshots/rows. This is the same owned-read recovery defect,
+grouped as one correction round, not counted twice.
+
+Correction validates a static SQLite header's owned role/version BEFORE allowing
+SQLite RW recovery, then enforces SQL query-only for read entry points. Foreign
+source extraction remains mode=ro; ownership does not authorize recovery of a
+different application's source. Foreign role/sidecar bytes are protected and
+query-only writes rejected. Unchanged original probes must publicly resume the
+complete1000row consumer without loss/duplicates and allow empty manager status,
+GC and a fresh complete snapshot after the killed unpublished transaction. Real
+sidecar/tenant/recovery chains are the three required core repairs; operational
+diagnostics, initial feature, pilot/tests growth and docs do not substitute.
+Exact after/result observations will follow verification; further known P2s
+still block acceptance.

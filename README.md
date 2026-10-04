@@ -58,7 +58,7 @@ cursor. A successful partial run reports `done:false`; only a completed export
 may be dumped. `dump` deliberately emits the entire records as JSONL. Summary
 commands omit titles and cursor/key material. Both snapshot and export
 initialization are create-only. Runtime refusal exits3, argument syntax exits2.
-HTTP/network failure preserves existing checkpoint data. Initial snapshot creation
+HTTP/network failure preserves existing checkpoint data. The HTTP client
 reports bounded allowlisted reasons: `remote_row_quota`/`remote_payload_quota`
 mean filter a smaller export or change operator limits; `remote_active_quota`
 means release unused snapshots or wait/collect; `remote_snapshot_expired` means
@@ -103,7 +103,11 @@ size.100000rows is an API cap, not a performance certification.
 Expiry rejects new page leases at its exact boundary. A previously claimed
 reader can finish within its bounded lease; GC and release preserve active
 leases. A crashed reader leaves at most its lease duration. Missing source,
-manager or export files fail without implicitly recreating them. Host files,
+manager or export files fail without implicitly recreating them.
+Owned manager/export read entry points allow SQLite to roll back an interrupted
+transaction's hot journal after checking the file's role/version header; SQL
+queries remain query-only. External sources remain read-only and require their
+own application to recover an interrupted source writer. Host files,
 clock and signing key are trusted; external host corruption, unauthorized file
 replacement and rollback are outside this guarantee. Symlink/hardlink aliases
 and source/manager reuse are rejected at supported API boundaries. Cursors are
